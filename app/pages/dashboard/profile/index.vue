@@ -1,24 +1,16 @@
 <!-- @format -->
-
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-
-const user = ref<{ username: string } | null>(null);
-
-onMounted(async () => {
-  try {
-    const res = await $fetch("/api/auth/me", { credentials: "include" });
-    user.value = res.user;
-  } catch {
-    user.value = null;
-  }
+const { data } = await useFetch("/api/auth/me", {
+  credentials: "include",
 });
+const user = computed(() => data.value?.user);
 </script>
 
 <template>
   <div class="main">
     <div class="header_info">
       <h1>Личный кабинет</h1>
+      <p>Добро пожаловать, {{ user?.username }}</p>
     </div>
     <!-- End header_info -->
     <div class="container_crm">

@@ -1,14 +1,18 @@
+// middleware/auth.global.ts
 export default defineNuxtRouteMiddleware(async (to) => {
-  // Сохраняем список страниц, которые нужно защитить
-  const protectedPages = ['/dashboard'];
+  // Защищаем все маршруты, начинающиеся с /dashboard
+  if (to.path.startsWith("/dashboard")) {
+    try {
+      const { data, error } = await useFetch("/api/auth/me", {
+        credentials: "include", // передаём cookie
+      });
 
-  if (!protectedPages.some(page => to.path.startsWith(page))) return;
-
-  try {
-    // Проверяем на сервере, авторизован ли пользователь
-    await $fetch('/api/auth/me', { method: 'GET', credentials: 'include' });
-  } catch {
-    // Если не авторизован — редирект на логин
-    return navigateTo('/login');
+      // Если нет данных о пользователе или ошибка — редиректим
+      if (error.value || !data.value?.user) {
+        return navigateTo("/login");
+      }
+    } catch {
+      return navigateTo("/login");
+    }
   }
 });
